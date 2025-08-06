@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 
 import { router as ProcuctsRouter } from '../routes/products.js'
+import { dbConnection } from '../database/config.js'
 
 
 
@@ -14,12 +15,21 @@ export class Server {
         this.port = process.env.PORT
         this.productosPath = '/api/productos'
 
+        //Conectar a BD
+        this.conectarDB()
+
         //Middlewares
         this.middlewares()
 
         // Rutas de Aplicación
         this.routes()
 
+
+    }
+
+    async conectarDB() {
+
+        await dbConnection()
 
     }
 
