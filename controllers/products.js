@@ -1,51 +1,75 @@
 import { request, response } from 'express'
+import { dbConnection } from '../database/config.js'
 
 
-const productsGet = (req = request, res = response) => {
+const productsGet = async(req = request, res = response) => {
 
-    const query = req.query
+    try {
 
-    res.json({
-        msg: 'get API - controlador',
-        query
-    })
+        const conn = await dbConnection()
+        const [rows] = await conn.query('select * from productos')
+        res.json(rows)
+        
+    } catch (error) {
 
-}
-
-const productsPost = (req, res) => {
-
-    const body = req.body
-
-    res.json({
-        msg: 'post API - controlador',
-        body
-    })
+        console.error(error)
+        res.status(500).json({ msg: 'Error al obtener productos' })
+        
+    }
 
 }
 
-const productsPut = (req, res) => {
+const productsPost = async(req, res) => {
 
-    const id = req.params.id
+    const { nombre, descripcion } = req.body
 
-    res.json({
-        msg: 'put API - controlador',
-        id,
-    })
+    try {
+
+        const conn = await dbConnection()
+        const query = 'insert into productos (nombre, descripcion) values (?, ?)'
+        const [result] = await conn.execute(query, [nombre, descripcion])
+
+        res.status(201).json({
+            msg: 'Producto creado exitosamente',
+            id: result.insertId,
+            nombre,
+            descripcion
+        })
+        
+    } catch (error) {
+
+        console.error('Error al insertar producto:', error)
+        res.status(500).json({
+            msg: 'Error al crear el producto',
+            error
+        })
+
+    }
 
 }
 
-const productsDelete = (req, res) => {
+// const productsPut = (req, res) => {
 
-    res.json({
-        msg: 'delete API - controlador'
-    })
+//     const id = req.params.id
 
-}
+//     res.json({
+//         msg: 'put API - controlador',
+//         id,
+//     })
+
+// }
+
+// const productsDelete = (req, res) => {
+
+//     res.json({
+//         msg: 'delete API - controlador'
+//     })
+
+// }
 
 export {
     productsGet,
     productsPost,
-    productsPut,
-    productsDelete,
+    
 
 }
